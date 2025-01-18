@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NanoSockets-CSharp", "NanoSockets-CSharp\NanoSockets-CSharp.csproj", "{D6C083E4-8674-4500-86D3-49668DD3A34E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D6C083E4-8674-4500-86D3-49668DD3A34E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6C083E4-8674-4500-86D3-49668DD3A34E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6C083E4-8674-4500-86D3-49668DD3A34E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6C083E4-8674-4500-86D3-49668DD3A34E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
