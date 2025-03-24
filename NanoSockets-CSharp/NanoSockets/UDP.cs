@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Security;
 
+#pragma warning disable CS1591
 #pragma warning disable SYSLIB1054
 #pragma warning disable CA1401
 #pragma warning disable CA2101

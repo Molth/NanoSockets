@@ -6,6 +6,7 @@ using System.Text;
 using System.Runtime.Intrinsics;
 #endif
 
+#pragma warning disable CS1591
 #pragma warning disable CS8632
 
 // ReSharper disable InconsistentNaming

@@ -2,6 +2,8 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
+#pragma warning disable CS1591
+
 namespace NanoSockets
 {
     public static class XxHash32
