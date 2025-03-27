@@ -1,25 +1,77 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFrameworks>net9.0;net8.0;net7.0;net6.0;net5.0</TargetFrameworks>
         <RootNamespace>NanoSockets</RootNamespace>
         <ImplicitUsings>disable</ImplicitUsings>
         <Nullable>enable</Nullable>
+
+        <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+
+        <PackageId>NanoSockets-CSharp</PackageId>
+        <Version>1.0.2</Version>
+        <Authors>Molth Nevin</Authors>
+        <Company>Hell</Company>
+        <Description>This project is an optimization based on the [original project](https://github.com/nxrighthere/NanoSockets).</Description>
+        <PackageProjectUrl>https://github.com/Molth/NanoSockets</PackageProjectUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageTags>sockets;udp;native;performance;networking</PackageTags>
+
+        <PackageOutputPath>./nupkgs</PackageOutputPath>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+        <SolutionRoot>$(MSBuildThisFileDirectory)../</SolutionRoot>
     </PropertyGroup>
 
     <ItemGroup>
-        <None Update="Plugins\Nanosockets\Windows\nanosockets.dll">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <Content Include="Plugins\NanoSockets\Windows\nanosockets.dll">
+            <Pack>true</Pack>
+            <PackagePath>runtimes/any/native/nanosockets.dll</PackagePath>
             <Link>nanosockets.dll</Link>
-        </None>
-        <None Update="Plugins\Nanosockets\Linux\libnanosockets.so">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+
+        <Content Include="Plugins\NanoSockets\Linux\libnanosockets.so">
+            <Pack>true</Pack>
+            <PackagePath>runtimes/any/native/libnanosockets.so</PackagePath>
             <Link>libnanosockets.so</Link>
-        </None>
-        <None Update="Plugins\Nanosockets\macOS\libnanosockets.dylib">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+
+        <Content Include="Plugins\NanoSockets\macOS\libnanosockets.dylib">
+            <Pack>true</Pack>
+            <PackagePath>runtimes/any/native/libnanosockets.dylib</PackagePath>
             <Link>libnanosockets.dylib</Link>
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="$(SolutionRoot)README.md">
+            <Pack>true</Pack>
+            <PackagePath>\</PackagePath>
+            <Link>README.md</Link>
+        </None>
+
+        <None Include="$(SolutionRoot)LICENSE">
+            <Pack>true</Pack>
+            <PackagePath>\</PackagePath>
+            <Link>LICENSE</Link>
         </None>
     </ItemGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    </PropertyGroup>
+
+    <Target Name="CleanPackageOutputPath" BeforeTargets="GenerateNuspec">
+        <RemoveDir Directories="$(PackageOutputPath)" />
+        <MakeDir Directories="$(PackageOutputPath)" />
+    </Target>
 
 </Project>
