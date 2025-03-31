@@ -7,6 +7,8 @@ using System.Security;
 #pragma warning disable CA1401
 #pragma warning disable CA2101
 
+// ReSharper disable ALL
+
 namespace NanoSockets
 {
     [SuppressUnmanagedCodeSecurity]

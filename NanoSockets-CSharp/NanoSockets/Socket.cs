@@ -6,6 +6,8 @@ using System.Runtime.InteropServices;
 #pragma warning disable CS1591
 #pragma warning disable CS8632
 
+// ReSharper disable ALL
+
 namespace NanoSockets
 {
     [StructLayout(LayoutKind.Explicit, Size = 8)]

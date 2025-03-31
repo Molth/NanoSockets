@@ -4,6 +4,8 @@ using System.Runtime.InteropServices;
 
 #pragma warning disable CS1591
 
+// ReSharper disable ALL
+
 namespace NanoSockets
 {
     public static class XxHash32
