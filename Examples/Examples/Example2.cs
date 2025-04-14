@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using NanoSockets;
 
 namespace Examples
 {
-    public sealed unsafe class Example2
+    // no unsafe
+    public sealed class Example2
     {
         public static void StartServer(ushort port, string localIP = "::0")
         {
@@ -69,7 +69,7 @@ namespace Examples
 
             Span<byte> buffer = stackalloc byte[1024];
 
-            ref Address remoteAddress = ref Unsafe.AsRef<Address>(null);
+            ref Address remoteAddress = ref Address.NullRef;
 
             int bytes = Encoding.UTF8.GetBytes("hello server.", buffer);
 

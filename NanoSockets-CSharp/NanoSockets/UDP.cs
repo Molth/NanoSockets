@@ -1,6 +1,8 @@
-﻿using System.Net.Sockets;
+﻿using System;
+using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Security;
+using System.Text;
 
 #pragma warning disable CS1591
 #pragma warning disable SYSLIB1054
@@ -14,6 +16,8 @@ namespace NanoSockets
     [SuppressUnmanagedCodeSecurity]
     public static class UDP
     {
+        public const int HOST_NAME_SIZE = 1025;
+
 #if __IOS__ || (UNITY_IOS && !UNITY_EDITOR)
         private const string NATIVE_LIBRARY = "__Internal";
 #else
@@ -65,11 +69,27 @@ namespace NanoSockets
         [DllImport(NATIVE_LIBRARY, EntryPoint = "nanosockets_address_set_ip", CallingConvention = CallingConvention.Cdecl)]
         public static extern Status SetIP(ref Address address, ref byte ip);
 
+        public static Status SetIP(ref Address address, ReadOnlySpan<char> ip)
+        {
+            var byteCount = Encoding.ASCII.GetByteCount(ip);
+            Span<byte> buffer = stackalloc byte[byteCount];
+            Encoding.ASCII.GetBytes(ip, buffer);
+            return SetIP(ref address, ref MemoryMarshal.GetReference(buffer));
+        }
+
         [DllImport(NATIVE_LIBRARY, EntryPoint = "nanosockets_address_get_ip", CallingConvention = CallingConvention.Cdecl)]
         public static extern Status GetIP(ref Address address, ref byte ip, int ipLength);
 
         [DllImport(NATIVE_LIBRARY, EntryPoint = "nanosockets_address_set_hostname", CallingConvention = CallingConvention.Cdecl)]
         public static extern Status SetHostName(ref Address address, ref byte name);
+
+        public static Status SetHostName(ref Address address, ReadOnlySpan<char> name)
+        {
+            var byteCount = Encoding.ASCII.GetByteCount(name);
+            Span<byte> buffer = stackalloc byte[byteCount];
+            Encoding.ASCII.GetBytes(name, buffer);
+            return SetHostName(ref address, ref MemoryMarshal.GetReference(buffer));
+        }
 
         [DllImport(NATIVE_LIBRARY, EntryPoint = "nanosockets_address_get_hostname", CallingConvention = CallingConvention.Cdecl)]
         public static extern Status GetHostName(ref Address address, ref byte name, int nameLength);

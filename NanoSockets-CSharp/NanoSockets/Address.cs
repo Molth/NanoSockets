@@ -16,6 +16,8 @@ namespace NanoSockets
     [StructLayout(LayoutKind.Explicit, Size = 20)]
     public struct Address : IEquatable<Address>
     {
+        public static ref Address NullRef => ref MemoryMarshal.GetReference(Span<Address>.Empty);
+
         public Span<byte> IPv6
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -44,20 +46,14 @@ namespace NanoSockets
         public static bool CreateFromIP(ReadOnlySpan<char> ip, out Address address)
         {
             address = new Address();
-            var byteCount = Encoding.ASCII.GetByteCount(ip);
-            Span<byte> buffer = stackalloc byte[byteCount];
-            Encoding.ASCII.GetBytes(ip, buffer);
-            return UDP.SetIP(ref address, ref MemoryMarshal.GetReference(buffer)) == Status.OK;
+            return UDP.SetIP(ref address, ip) == Status.OK;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool CreateFromHostName(ReadOnlySpan<char> name, out Address address)
         {
             address = new Address();
-            var byteCount = Encoding.ASCII.GetByteCount(name);
-            Span<byte> buffer = stackalloc byte[byteCount];
-            Encoding.ASCII.GetBytes(name, buffer);
-            return UDP.SetHostName(ref address, ref MemoryMarshal.GetReference(buffer)) == Status.OK;
+            return UDP.SetHostName(ref address, name) == Status.OK;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

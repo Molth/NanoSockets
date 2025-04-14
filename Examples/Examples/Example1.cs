@@ -7,6 +7,7 @@ using NanoSockets;
 
 namespace Examples
 {
+    // unsafe
     public sealed unsafe class Example1
     {
         public static void StartServer(ushort port, string localIP = "::0")
