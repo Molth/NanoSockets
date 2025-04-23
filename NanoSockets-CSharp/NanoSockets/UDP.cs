@@ -18,11 +18,7 @@ namespace NanoSockets
     {
         public const int HOST_NAME_SIZE = 1025;
 
-#if __IOS__ || (UNITY_IOS && !UNITY_EDITOR)
-        private const string NATIVE_LIBRARY = "__Internal";
-#else
         private const string NATIVE_LIBRARY = "nanosockets";
-#endif
 
         [DllImport(NATIVE_LIBRARY, EntryPoint = "nanosockets_initialize", CallingConvention = CallingConvention.Cdecl)]
         public static extern Status Initialize();
