@@ -1,0 +1,213 @@
+name: Build binaries
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "branch to build (e.g., main)"
+        required: true
+        default: "main"
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        architecture: [x64, arm64]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+
+      - run: |
+          sudo apt update
+          if [ "${{ matrix.architecture }}" == "arm64" ]; then
+            sudo apt install -y cmake gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+          else
+            sudo apt install -y cmake build-essential
+          fi
+
+      - run: |
+          cd Native
+          mkdir -p build && cd build
+          if [ "${{ matrix.architecture }}" == "arm64" ]; then
+            cmake .. \
+              -DCMAKE_SYSTEM_NAME=Linux \
+              -DCMAKE_SYSTEM_PROCESSOR=aarch64 \
+              -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc \
+              -DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++ \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DNANOSOCKETS_SHARED=1
+          else
+            cmake .. \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DNANOSOCKETS_SHARED=1
+          fi
+          make
+          cp libnanosockets.so ../libnanosockets.so
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nanosockets-linux-${{ matrix.architecture }}
+          path: Native/libnanosockets.so
+
+  build-osx:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        arch:
+          - x64
+          - arm64
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+
+      - run: |
+          cd Native
+          mkdir -p build && cd build
+          if [ "${{ matrix.arch }}" = "x64" ]; then
+            cmake .. -DCMAKE_OSX_ARCHITECTURES="x86_64" -DCMAKE_BUILD_TYPE=Release -DNANOSOCKETS_SHARED=1
+          else
+            cmake .. -DCMAKE_OSX_ARCHITECTURES="arm64" -DCMAKE_BUILD_TYPE=Release -DNANOSOCKETS_SHARED=1
+          fi
+          make
+          cp libnanosockets.dylib ../libnanosockets.dylib
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nanosockets-osx-${{ matrix.arch }}
+          path: Native/libnanosockets.dylib
+
+  build-win-x64:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+
+      - uses: ilammy/msvc-dev-cmd@v1
+
+      - run: |
+          cd Native
+          mkdir build && cd build
+          cmake .. -G "Visual Studio 17 2022" -A x64 -DNANOSOCKETS_SHARED=1
+          cmake --build . --config Release
+          copy Release\nanosockets.dll ..\nanosockets.dll
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nanosockets-win-x64
+          path: Native\nanosockets.dll
+
+  build-android:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - abi: armeabi-v7a
+            target_dir: android-arm
+          - abi: arm64-v8a
+            target_dir: android-arm64
+          - abi: x86
+            target_dir: android-x86
+          - abi: x86_64
+            target_dir: android-x64
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+
+      - run: sudo apt update && sudo apt install -y cmake unzip
+
+      - uses: nttld/setup-ndk@v1
+        id: setup-ndk
+        with:
+          ndk-version: r26d
+          add-to-path: false
+
+      - env:
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+        run: |
+          cd Native
+          mkdir -p build/${{ matrix.abi }}
+          cmake -S . -B build/${{ matrix.abi }} \
+                -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake \
+                -DANDROID_ABI=${{ matrix.abi }} \
+                -DANDROID_NATIVE_API_LEVEL=21 \
+                -DMI_ANDROID=ON \
+                -DCMAKE_BUILD_TYPE=Release \
+                -DNANOSOCKETS_SHARED=1
+          cmake --build build/${{ matrix.abi }}
+          mkdir -p ${{ matrix.target_dir }}
+          cp build/${{ matrix.abi }}/libnanosockets.so ${{ matrix.target_dir }}/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nanosockets-${{ matrix.target_dir }}
+          path: Native/${{ matrix.target_dir }}/
+
+  build-ios-arm64:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+
+      - run: brew install cmake --formula
+
+      - run: |
+          cd Native
+          mkdir -p build && cd build
+          cmake .. \
+            -G Xcode \
+            -DCMAKE_SYSTEM_NAME=iOS \
+            -DCMAKE_OSX_SYSROOT=iphoneos \
+            -DCMAKE_OSX_ARCHITECTURES=arm64 \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0 \
+            -DMI_IOS=ON \
+            -DMI_BUILD_SHARED=OFF \
+            -DMI_BUILD_STATIC=ON \
+            -DMI_BUILD_TESTS=OFF \
+            -DNANOSOCKETS_STATIC=1 \
+            -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+          cmake --build . --config Release --target nanosockets_static
+          cp Release-iphoneos/libnanosockets_static.a ../libnanosockets.a
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nanosockets-ios-arm64
+          path: Native/libnanosockets.a
+
+  package:
+    needs:
+      [build-linux, build-osx, build-win-x64, build-android, build-ios-arm64]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - run: |
+          mkdir -p dist/{linux-x64/native,linux-arm64/native,osx-x64/native,osx-arm64/native,win-x64/native,android-arm/native,android-arm64/native,android-x86/native,android-x64/native,ios-arm64/native}
+
+          cp artifacts/nanosockets-linux-x64/libnanosockets.so dist/linux-x64/native/
+          cp artifacts/nanosockets-linux-arm64/libnanosockets.so dist/linux-arm64/native/
+
+          cp artifacts/nanosockets-osx-x64/libnanosockets.dylib dist/osx-x64/native/
+          cp artifacts/nanosockets-osx-arm64/libnanosockets.dylib dist/osx-arm64/native/
+
+          cp artifacts/nanosockets-win-x64/nanosockets.dll dist/win-x64/native/
+
+          cp artifacts/nanosockets-android-arm/libnanosockets.so dist/android-arm/native/
+          cp artifacts/nanosockets-android-arm64/libnanosockets.so dist/android-arm64/native/
+          cp artifacts/nanosockets-android-x86/libnanosockets.so dist/android-x86/native/
+          cp artifacts/nanosockets-android-x64/libnanosockets.so dist/android-x64/native/
+
+          cp artifacts/nanosockets-ios-arm64/libnanosockets.a dist/ios-arm64/native/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nanosockets-runtimes
+          path: dist
