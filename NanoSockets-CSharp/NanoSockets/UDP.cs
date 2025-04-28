@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
@@ -65,6 +66,7 @@ namespace NanoSockets
         [DllImport(NATIVE_LIBRARY, EntryPoint = "nanosockets_address_set_ip", CallingConvention = CallingConvention.Cdecl)]
         public static extern Status SetIP(ref Address address, ref byte ip);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Status SetIP(ref Address address, ReadOnlySpan<char> ip)
         {
             var byteCount = Encoding.ASCII.GetByteCount(ip);
@@ -79,6 +81,7 @@ namespace NanoSockets
         [DllImport(NATIVE_LIBRARY, EntryPoint = "nanosockets_address_set_hostname", CallingConvention = CallingConvention.Cdecl)]
         public static extern Status SetHostName(ref Address address, ref byte name);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Status SetHostName(ref Address address, ReadOnlySpan<char> name)
         {
             var byteCount = Encoding.ASCII.GetByteCount(name);
