@@ -166,5 +166,8 @@ namespace NanoSockets
 
         public static bool operator ==(Address left, Address right) => left.Equals(right);
         public static bool operator !=(Address left, Address right) => !(left == right);
+
+        public Span<byte> AsSpan() => MemoryMarshal.CreateSpan(ref Unsafe.As<Address, byte>(ref Unsafe.AsRef(in this)), 20);
+        public ReadOnlySpan<byte> AsReadOnlySpan() => MemoryMarshal.CreateReadOnlySpan(ref Unsafe.As<Address, byte>(ref Unsafe.AsRef(in this)), 20);
     }
 }
