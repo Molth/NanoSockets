@@ -20,9 +20,6 @@ namespace Examples
             if (server.Bind(listenAddress) == 0)
                 Console.WriteLine("Socket bound!");
 
-            if (!server.SetDontFragment())
-                Console.WriteLine("Don't fragment option error!");
-
             if (!server.SetNonBlocking(true))
                 Console.WriteLine("Non-blocking option error!");
 
@@ -60,9 +57,6 @@ namespace Examples
 
             if (client.Connect(connectionAddress) == 0)
                 Console.WriteLine("Socket connected!");
-
-            if (!client.SetDontFragment())
-                Console.WriteLine("Don't fragment option error!");
 
             if (!client.SetNonBlocking(true))
                 Console.WriteLine("Non-blocking option error!");

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 
 #pragma warning disable CS1591
 
@@ -10,6 +11,29 @@ namespace NanoSockets
 {
     public static class XxHash32
     {
+        private static uint _XXHASH_32_SEED = GenerateSeed();
+        public static uint XXHASH_32_SEED => _XXHASH_32_SEED;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint GenerateSeed()
+        {
+            uint seed;
+            Span<byte> data = stackalloc byte[4];
+            ref var local = ref MemoryMarshal.GetReference(data);
+
+            do
+            {
+                RandomNumberGenerator.Fill(data);
+                seed = Unsafe.ReadUnaligned<uint>(ref local);
+            } while (seed == 0);
+
+            return seed;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetSeed(uint newSeed) => _XXHASH_32_SEED = newSeed;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int Hash(ReadOnlySpan<byte> buffer, uint seed = 0)
         {
             uint num1 = 0;

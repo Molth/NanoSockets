@@ -29,9 +29,6 @@ namespace Examples
             if (UDP.Bind(server, ref listenAddress) == 0)
                 Console.WriteLine("Socket bound!");
 
-            if (UDP.SetDontFragment(server) != Status.OK)
-                Console.WriteLine("Don't fragment option error!");
-
             if (UDP.SetNonBlocking(server, 1) != Status.OK)
                 Console.WriteLine("Non-blocking option error!");
 
@@ -76,9 +73,6 @@ namespace Examples
 
             if (UDP.Connect(client, ref connectionAddress) == 0)
                 Console.WriteLine("Socket connected!");
-
-            if (UDP.SetDontFragment(client) != Status.OK)
-                Console.WriteLine("Don't fragment option error!");
 
             if (UDP.SetNonBlocking(client, 1) != Status.OK)
                 Console.WriteLine("Non-blocking option error!");

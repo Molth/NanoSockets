@@ -47,8 +47,8 @@ namespace NanoSockets
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                ref var reference = ref Unsafe.As<Address, ulong>(ref Unsafe.AsRef(in this));
-                return reference == 0 && Unsafe.Add(ref reference, 1) >> 32 == 0xFFFF;
+                ref var reference = ref Unsafe.As<Address, int>(ref Unsafe.AsRef(in this));
+                return Unsafe.Add(ref reference, 2) == -0x10000 && reference == 0 && Unsafe.Add(ref reference, 1) == 0;
             }
         }
 
@@ -150,7 +150,7 @@ namespace NanoSockets
         }
 
         public override bool Equals(object? obj) => obj is Address socketAddress && Equals(socketAddress);
-        public override int GetHashCode() => XxHash32.Hash(MemoryMarshal.CreateReadOnlySpan(ref Unsafe.As<Address, byte>(ref Unsafe.AsRef(in this)), 16)) ^ Port;
+        public override int GetHashCode() => XxHash32.Hash(MemoryMarshal.CreateReadOnlySpan(ref Unsafe.As<Address, byte>(ref Unsafe.AsRef(in this)), 16), XxHash32.XXHASH_32_SEED) ^ Port;
 
         public override string ToString()
         {

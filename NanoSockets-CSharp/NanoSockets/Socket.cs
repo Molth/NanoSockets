@@ -45,9 +45,6 @@ namespace NanoSockets
         public bool SetNonBlocking(bool nonBlocking) => UDP.SetNonBlocking(this, (byte)(nonBlocking ? 1 : 0)) == 0;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool SetDontFragment() => UDP.SetDontFragment(this) == 0;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int Poll(long milliseconds) => UDP.Poll(this, milliseconds);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

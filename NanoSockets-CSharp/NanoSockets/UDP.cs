@@ -48,9 +48,6 @@ namespace NanoSockets
         [DllImport(NATIVE_LIBRARY, EntryPoint = "nanosockets_set_nonblocking", CallingConvention = CallingConvention.Cdecl)]
         public static extern Status SetNonBlocking(Socket socket, byte state);
 
-        [DllImport(NATIVE_LIBRARY, EntryPoint = "nanosockets_set_dontfragment", CallingConvention = CallingConvention.Cdecl)]
-        public static extern Status SetDontFragment(Socket socket);
-
         [DllImport(NATIVE_LIBRARY, EntryPoint = "nanosockets_poll", CallingConvention = CallingConvention.Cdecl)]
         public static extern int Poll(Socket socket, long milliseconds);
 
