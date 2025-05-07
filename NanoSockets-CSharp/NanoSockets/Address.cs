@@ -150,7 +150,19 @@ namespace NanoSockets
         }
 
         public override bool Equals(object? obj) => obj is Address socketAddress && Equals(socketAddress);
-        public override int GetHashCode() => XxHash32.Hash(MemoryMarshal.CreateReadOnlySpan(ref Unsafe.As<Address, byte>(ref Unsafe.AsRef(in this)), 16), XxHash32.XXHASH_32_SEED) ^ Port;
+
+        public override int GetHashCode()
+        {
+            var hashCode = new HashCode();
+#if NET6_0_OR_GREATER
+            hashCode.AddBytes(MemoryMarshal.CreateReadOnlySpan(ref Unsafe.As<Address, byte>(ref Unsafe.AsRef(in this)), 20));
+#else
+            ref int reference = ref Unsafe.As<Address, int>(ref Unsafe.AsRef(in this));
+            for (int i = 0; i < 5; i++)
+                hashCode.Add(Unsafe.Add(ref reference, i));
+#endif
+            return hashCode.ToHashCode();
+        }
 
         public override string ToString()
         {
