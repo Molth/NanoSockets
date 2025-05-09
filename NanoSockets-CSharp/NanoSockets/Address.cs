@@ -8,6 +8,7 @@ using System.Runtime.Intrinsics;
 
 #pragma warning disable CS1591
 #pragma warning disable CS8632
+#pragma warning disable CS9084
 
 // ReSharper disable ALL
 
@@ -57,6 +58,9 @@ namespace NanoSockets
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => !IsIPv4;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ref byte GetPinnableReference() => ref IPv6.GetPinnableReference();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool CreateFromIP(ReadOnlySpan<char> ip, out Address address)
