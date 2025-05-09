@@ -38,7 +38,7 @@ namespace NanoSockets
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                ref var reference = ref Unsafe.As<Address, long>(ref Unsafe.AsRef(in this));
+                ref long reference = ref Unsafe.As<Address, long>(ref Unsafe.AsRef(in this));
                 return reference != 0 || Unsafe.Add(ref reference, 1) != 0;
             }
         }
@@ -48,7 +48,7 @@ namespace NanoSockets
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                ref var reference = ref Unsafe.As<Address, int>(ref Unsafe.AsRef(in this));
+                ref int reference = ref Unsafe.As<Address, int>(ref Unsafe.AsRef(in this));
                 return Unsafe.Add(ref reference, 2) == -0x10000 && reference == 0 && Unsafe.Add(ref reference, 1) == 0;
             }
         }
@@ -80,7 +80,7 @@ namespace NanoSockets
         public bool GetIP(int bufferSize, out string? ip)
         {
             Span<byte> buffer = stackalloc byte[bufferSize];
-            var status = UDP.GetIP(ref Unsafe.AsRef(in this), ref MemoryMarshal.GetReference(buffer), bufferSize);
+            Status status = UDP.GetIP(ref Unsafe.AsRef(in this), ref MemoryMarshal.GetReference(buffer), bufferSize);
             if (status == Status.OK)
             {
                 ip = Encoding.ASCII.GetString(buffer[..buffer.IndexOf((byte)'\0')]);
@@ -95,7 +95,7 @@ namespace NanoSockets
         public bool GetIP(int bufferSize, Span<byte> ip, out int byteCount)
         {
             Span<byte> buffer = stackalloc byte[bufferSize];
-            var status = UDP.GetIP(ref Unsafe.AsRef(in this), ref MemoryMarshal.GetReference(buffer), bufferSize);
+            Status status = UDP.GetIP(ref Unsafe.AsRef(in this), ref MemoryMarshal.GetReference(buffer), bufferSize);
             if (status == Status.OK)
             {
                 byteCount = buffer.IndexOf((byte)'\0');
@@ -113,7 +113,7 @@ namespace NanoSockets
         public bool GetHostName(int bufferSize, out string? name)
         {
             Span<byte> buffer = stackalloc byte[bufferSize];
-            var status = UDP.GetHostName(ref Unsafe.AsRef(in this), ref MemoryMarshal.GetReference(buffer), bufferSize);
+            Status status = UDP.GetHostName(ref Unsafe.AsRef(in this), ref MemoryMarshal.GetReference(buffer), bufferSize);
             if (status == Status.OK)
             {
                 name = Encoding.ASCII.GetString(buffer[..buffer.IndexOf((byte)'\0')]);
@@ -128,7 +128,7 @@ namespace NanoSockets
         public bool GetHostName(int bufferSize, Span<byte> name, out int byteCount)
         {
             Span<byte> buffer = stackalloc byte[bufferSize];
-            var status = UDP.GetHostName(ref Unsafe.AsRef(in this), ref MemoryMarshal.GetReference(buffer), bufferSize);
+            Status status = UDP.GetHostName(ref Unsafe.AsRef(in this), ref MemoryMarshal.GetReference(buffer), bufferSize);
             if (status == Status.OK)
             {
                 byteCount = buffer.IndexOf((byte)'\0');
@@ -148,8 +148,8 @@ namespace NanoSockets
             if (Vector128.IsHardwareAccelerated)
                 return Vector128.LoadUnsafe(ref Unsafe.As<Address, byte>(ref Unsafe.AsRef(in this))) == Vector128.LoadUnsafe(ref Unsafe.As<Address, byte>(ref other)) && Port == other.Port;
 #endif
-            ref var left = ref Unsafe.As<Address, int>(ref Unsafe.AsRef(in this));
-            ref var right = ref Unsafe.As<Address, int>(ref other);
+            ref int left = ref Unsafe.As<Address, int>(ref Unsafe.AsRef(in this));
+            ref int right = ref Unsafe.As<Address, int>(ref other);
             return left == right && Unsafe.Add(ref left, 1) == Unsafe.Add(ref right, 1) && Unsafe.Add(ref left, 2) == Unsafe.Add(ref right, 2) && Unsafe.Add(ref left, 3) == Unsafe.Add(ref right, 3) && Unsafe.Add(ref left, 4) == Unsafe.Add(ref right, 4);
         }
 
@@ -157,7 +157,7 @@ namespace NanoSockets
 
         public override int GetHashCode()
         {
-            var hashCode = new HashCode();
+            HashCode hashCode = new HashCode();
 #if NET6_0_OR_GREATER
             hashCode.AddBytes(MemoryMarshal.CreateReadOnlySpan(ref Unsafe.As<Address, byte>(ref Unsafe.AsRef(in this)), 20));
 #else

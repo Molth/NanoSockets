@@ -51,11 +51,17 @@ namespace NanoSockets
         [DllImport(NATIVE_LIBRARY, EntryPoint = "nanosockets_poll", CallingConvention = CallingConvention.Cdecl)]
         public static extern int Poll(Socket socket, long milliseconds);
 
+        [DllImport(NATIVE_LIBRARY, EntryPoint = "nanosockets_send", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int Send(Socket socket, ref Address address, ref byte buffer, int bufferLength);
+
         [DllImport(NATIVE_LIBRARY, EntryPoint = "nanosockets_receive", CallingConvention = CallingConvention.Cdecl)]
         public static extern int Receive(Socket socket, ref Address address, ref byte buffer, int bufferLength);
 
-        [DllImport(NATIVE_LIBRARY, EntryPoint = "nanosockets_send", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int Send(Socket socket, ref Address address, ref byte buffer, int bufferLength);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int Send(Socket socket, ref byte buffer, int bufferLength) => Send(socket, ref Address.NullRef, ref buffer, bufferLength);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int Receive(Socket socket, ref byte buffer, int bufferLength) => Receive(socket, ref Address.NullRef, ref buffer, bufferLength);
 
         [DllImport(NATIVE_LIBRARY, EntryPoint = "nanosockets_address_get", CallingConvention = CallingConvention.Cdecl)]
         public static extern Status GetAddress(Socket socket, ref Address address);
@@ -66,7 +72,7 @@ namespace NanoSockets
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Status SetIP(ref Address address, ReadOnlySpan<char> ip)
         {
-            var byteCount = Encoding.ASCII.GetByteCount(ip);
+            int byteCount = Encoding.ASCII.GetByteCount(ip);
             Span<byte> buffer = stackalloc byte[byteCount];
             Encoding.ASCII.GetBytes(ip, buffer);
             return SetIP(ref address, ref MemoryMarshal.GetReference(buffer));
@@ -81,7 +87,7 @@ namespace NanoSockets
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Status SetHostName(ref Address address, ReadOnlySpan<char> name)
         {
-            var byteCount = Encoding.ASCII.GetByteCount(name);
+            int byteCount = Encoding.ASCII.GetByteCount(name);
             Span<byte> buffer = stackalloc byte[byteCount];
             Encoding.ASCII.GetBytes(name, buffer);
             return SetHostName(ref address, ref MemoryMarshal.GetReference(buffer));

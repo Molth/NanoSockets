@@ -63,11 +63,9 @@ namespace Examples
 
             Span<byte> buffer = stackalloc byte[1024];
 
-            ref Address remoteAddress = ref Address.NullRef;
-
             int bytes = Encoding.UTF8.GetBytes("hello server.", buffer);
 
-            client.Send(remoteAddress, buffer.Slice(0, bytes));
+            client.Send(buffer.Slice(0, bytes));
 
             byte i = 0;
 
@@ -75,7 +73,7 @@ namespace Examples
             {
                 bytes = Encoding.UTF8.GetBytes($"test send {i++}.", buffer);
 
-                client.Send(remoteAddress, buffer.Slice(0, bytes));
+                client.Send(buffer.Slice(0, bytes));
 
                 Thread.Sleep(1000);
             }

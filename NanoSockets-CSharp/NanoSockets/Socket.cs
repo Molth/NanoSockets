@@ -48,10 +48,16 @@ namespace NanoSockets
         public int Poll(long milliseconds) => UDP.Poll(this, milliseconds);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int Send(in Address address, ReadOnlySpan<byte> buffer) => UDP.Send(this, ref Unsafe.AsRef(in address), ref MemoryMarshal.GetReference(buffer), buffer.Length);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int Receive(ref Address address, Span<byte> buffer) => UDP.Receive(this, ref address, ref MemoryMarshal.GetReference(buffer), buffer.Length);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int Send(in Address address, ReadOnlySpan<byte> buffer) => UDP.Send(this, ref Unsafe.AsRef(in address), ref MemoryMarshal.GetReference(buffer), buffer.Length);
+        public int Send(ReadOnlySpan<byte> buffer) => UDP.Send(this, ref MemoryMarshal.GetReference(buffer), buffer.Length);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int Receive(Span<byte> buffer) => UDP.Receive(this, ref MemoryMarshal.GetReference(buffer), buffer.Length);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool GetAddress(ref Address address) => UDP.GetAddress(this, ref address) == 0;
@@ -60,7 +66,7 @@ namespace NanoSockets
         public bool GetSendBufferSize(out int sendBufferSize)
         {
             sendBufferSize = 0;
-            var optionLength = 4;
+            int optionLength = 4;
             return UDP.GetOption(Handle, SocketOptionLevel.Socket, SocketOptionName.SendBuffer, ref sendBufferSize, ref optionLength) == Status.OK;
         }
 
@@ -71,7 +77,7 @@ namespace NanoSockets
         public bool GetReceiveBufferSize(out int receiveBufferSize)
         {
             receiveBufferSize = 0;
-            var optionLength = 4;
+            int optionLength = 4;
             return UDP.GetOption(Handle, SocketOptionLevel.Socket, SocketOptionName.ReceiveBuffer, ref receiveBufferSize, ref optionLength) == Status.OK;
         }
 

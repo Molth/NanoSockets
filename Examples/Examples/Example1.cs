@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -79,11 +78,9 @@ namespace Examples
 
             byte* buffer = stackalloc byte[1024];
 
-            ref Address remoteAddress = ref Unsafe.AsRef<Address>(null);
-
             int bytes = Encoding.UTF8.GetBytes("hello server.", MemoryMarshal.CreateSpan(ref *buffer, 1024));
 
-            UDP.Send(client, ref remoteAddress, ref *buffer, bytes);
+            UDP.Send(client, ref *buffer, bytes);
 
             byte i = 0;
 
@@ -91,7 +88,7 @@ namespace Examples
             {
                 bytes = Encoding.UTF8.GetBytes($"test send {i++}.", MemoryMarshal.CreateSpan(ref *buffer, 1024));
 
-                UDP.Send(client, ref remoteAddress, ref *buffer, bytes);
+                UDP.Send(client, ref *buffer, bytes);
 
                 Thread.Sleep(1000);
             }
