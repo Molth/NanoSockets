@@ -9,7 +9,7 @@
         <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
 
         <PackageId>NanoSockets-CSharp</PackageId>
-        <Version>1.1.3</Version>
+        <Version>1.1.4</Version>
         <Authors>Molth Nevin</Authors>
         <Company>Hell</Company>
         <Description>This project is an optimization based on the [original project](https://github.com/nxrighthere/NanoSockets).</Description>
