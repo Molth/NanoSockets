@@ -2,9 +2,7 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
-#if NET7_0_OR_GREATER
-using System.Runtime.Intrinsics;
-#endif
+using NativeCollections;
 
 #pragma warning disable CS1591
 #pragma warning disable CS8632
@@ -77,10 +75,10 @@ namespace NanoSockets
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool GetIP(int bufferSize, out string? ip)
+        public bool GetIP(out string? ip)
         {
-            Span<byte> buffer = stackalloc byte[bufferSize];
-            Status status = UDP.GetIP(ref Unsafe.AsRef(in this), ref MemoryMarshal.GetReference(buffer), bufferSize);
+            Span<byte> buffer = stackalloc byte[1024];
+            Status status = UDP.GetIP(ref Unsafe.AsRef(in this), ref MemoryMarshal.GetReference(buffer), 1024);
             if (status == Status.OK)
             {
                 ip = Encoding.ASCII.GetString(buffer[..buffer.IndexOf((byte)'\0')]);
@@ -92,10 +90,10 @@ namespace NanoSockets
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool GetIP(int bufferSize, Span<byte> ip, out int byteCount)
+        public bool GetIP(Span<byte> ip, out int byteCount)
         {
-            Span<byte> buffer = stackalloc byte[bufferSize];
-            Status status = UDP.GetIP(ref Unsafe.AsRef(in this), ref MemoryMarshal.GetReference(buffer), bufferSize);
+            Span<byte> buffer = stackalloc byte[1024];
+            Status status = UDP.GetIP(ref Unsafe.AsRef(in this), ref MemoryMarshal.GetReference(buffer), 1024);
             if (status == Status.OK)
             {
                 byteCount = buffer.IndexOf((byte)'\0');
@@ -110,10 +108,10 @@ namespace NanoSockets
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool GetHostName(int bufferSize, out string? name)
+        public bool GetHostName(out string? name)
         {
-            Span<byte> buffer = stackalloc byte[bufferSize];
-            Status status = UDP.GetHostName(ref Unsafe.AsRef(in this), ref MemoryMarshal.GetReference(buffer), bufferSize);
+            Span<byte> buffer = stackalloc byte[1024];
+            Status status = UDP.GetHostName(ref Unsafe.AsRef(in this), ref MemoryMarshal.GetReference(buffer), 1024);
             if (status == Status.OK)
             {
                 name = Encoding.ASCII.GetString(buffer[..buffer.IndexOf((byte)'\0')]);
@@ -125,10 +123,10 @@ namespace NanoSockets
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool GetHostName(int bufferSize, Span<byte> name, out int byteCount)
+        public bool GetHostName(Span<byte> name, out int byteCount)
         {
-            Span<byte> buffer = stackalloc byte[bufferSize];
-            Status status = UDP.GetHostName(ref Unsafe.AsRef(in this), ref MemoryMarshal.GetReference(buffer), bufferSize);
+            Span<byte> buffer = stackalloc byte[1024];
+            Status status = UDP.GetHostName(ref Unsafe.AsRef(in this), ref MemoryMarshal.GetReference(buffer), 1024);
             if (status == Status.OK)
             {
                 byteCount = buffer.IndexOf((byte)'\0');
@@ -144,40 +142,19 @@ namespace NanoSockets
 
         public bool Equals(Address other)
         {
-#if NET7_0_OR_GREATER
-            if (Vector128.IsHardwareAccelerated)
-                return Vector128.LoadUnsafe(ref Unsafe.As<Address, byte>(ref Unsafe.AsRef(in this))) == Vector128.LoadUnsafe(ref Unsafe.As<Address, byte>(ref other)) && Port == other.Port;
-#endif
-            ref int left = ref Unsafe.As<Address, int>(ref Unsafe.AsRef(in this));
-            ref int right = ref Unsafe.As<Address, int>(ref other);
-            return left == right && Unsafe.Add(ref left, 1) == Unsafe.Add(ref right, 1) && Unsafe.Add(ref left, 2) == Unsafe.Add(ref right, 2) && Unsafe.Add(ref left, 3) == Unsafe.Add(ref right, 3) && Unsafe.Add(ref left, 4) == Unsafe.Add(ref right, 4);
+            ref byte local1 = ref Unsafe.As<Address, byte>(ref Unsafe.AsRef(in this));
+            ref byte local2 = ref Unsafe.As<Address, byte>(ref other);
+            return SpanHelpers.Compare(ref local1, ref local2, (nuint)Unsafe.SizeOf<Address>());
         }
 
         public override bool Equals(object? obj) => obj is Address socketAddress && Equals(socketAddress);
 
-        public override int GetHashCode()
-        {
-            HashCode hashCode = new HashCode();
-#if NET6_0_OR_GREATER
-            hashCode.AddBytes(MemoryMarshal.CreateReadOnlySpan(ref Unsafe.As<Address, byte>(ref Unsafe.AsRef(in this)), 20));
-#else
-            ref int reference = ref Unsafe.As<Address, int>(ref Unsafe.AsRef(in this));
-            for (int i = 0; i < 5; i++)
-                hashCode.Add(Unsafe.Add(ref reference, i));
-#endif
-            return hashCode.ToHashCode();
-        }
+        public override int GetHashCode() => XxHash.Hash32(this);
 
         public override string ToString()
         {
-            Span<byte> buffer = stackalloc byte[64];
+            Span<byte> buffer = stackalloc byte[1024];
             return UDP.GetIP(ref Unsafe.AsRef(in this), ref MemoryMarshal.GetReference(buffer), 64) == Status.OK ? Encoding.ASCII.GetString(buffer[..buffer.IndexOf((byte)'\0')]) + ":" + Port : "ERROR";
-        }
-
-        public string ToString(int bufferSize)
-        {
-            Span<byte> buffer = stackalloc byte[bufferSize];
-            return UDP.GetIP(ref Unsafe.AsRef(in this), ref MemoryMarshal.GetReference(buffer), bufferSize) == Status.OK ? Encoding.ASCII.GetString(buffer[..buffer.IndexOf((byte)'\0')]) + ":" + Port : "ERROR";
         }
 
         public static bool operator ==(Address left, Address right) => left.Equals(right);
