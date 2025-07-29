@@ -47,7 +47,7 @@ namespace NanoSockets
             get
             {
                 ref int reference = ref Unsafe.As<Address, int>(ref Unsafe.AsRef(in this));
-                return Unsafe.Add(ref reference, 2) == -0x10000 && reference == 0 && Unsafe.Add(ref reference, 1) == 0;
+                return Unsafe.Add(ref reference, 2) == (BitConverter.IsLittleEndian ? -65536 : 65535) && Unsafe.As<int, long>(ref reference) == 0;
             }
         }
 

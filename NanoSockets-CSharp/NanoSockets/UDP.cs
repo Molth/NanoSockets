@@ -73,8 +73,9 @@ namespace NanoSockets
         public static Status SetIP(ref Address address, ReadOnlySpan<char> ip)
         {
             int byteCount = Encoding.ASCII.GetByteCount(ip);
-            Span<byte> buffer = stackalloc byte[byteCount];
+            Span<byte> buffer = stackalloc byte[byteCount + 1];
             Encoding.ASCII.GetBytes(ip, buffer);
+            buffer[byteCount] = 0;
             return SetIP(ref address, ref MemoryMarshal.GetReference(buffer));
         }
 
@@ -88,8 +89,9 @@ namespace NanoSockets
         public static Status SetHostName(ref Address address, ReadOnlySpan<char> name)
         {
             int byteCount = Encoding.ASCII.GetByteCount(name);
-            Span<byte> buffer = stackalloc byte[byteCount];
+            Span<byte> buffer = stackalloc byte[byteCount + 1];
             Encoding.ASCII.GetBytes(name, buffer);
+            buffer[byteCount] = 0;
             return SetHostName(ref address, ref MemoryMarshal.GetReference(buffer));
         }
 
