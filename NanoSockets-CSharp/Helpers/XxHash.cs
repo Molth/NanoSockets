@@ -7,7 +7,7 @@ using System.Security.Cryptography;
 
 // ReSharper disable ALL
 
-namespace NativeCollections
+namespace NanoSockets
 {
     internal static class XxHash
     {

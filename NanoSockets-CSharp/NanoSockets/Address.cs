@@ -2,7 +2,6 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
-using NativeCollections;
 
 #pragma warning disable CS1591
 #pragma warning disable CS8632
@@ -16,6 +15,8 @@ namespace NanoSockets
     public struct Address : IEquatable<Address>
     {
         public static ref Address NullRef => ref MemoryMarshal.GetReference(Span<Address>.Empty);
+
+        private static readonly int ADDRESS_FAMILY_INTER_NETWORK_V4_MAPPED_V6 = (BitConverter.IsLittleEndian ? -65536 : 65535);
 
         public Span<byte> IPv6
         {
@@ -31,23 +32,13 @@ namespace NanoSockets
 
         [FieldOffset(16)] public ushort Port;
 
-        public bool IsCreated
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                ref long reference = ref Unsafe.As<Address, long>(ref Unsafe.AsRef(in this));
-                return reference != 0 || Unsafe.Add(ref reference, 1) != 0;
-            }
-        }
-
         public bool IsIPv4
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
                 ref int reference = ref Unsafe.As<Address, int>(ref Unsafe.AsRef(in this));
-                return Unsafe.Add(ref reference, 2) == (BitConverter.IsLittleEndian ? -65536 : 65535) && Unsafe.As<int, long>(ref reference) == 0;
+                return Unsafe.Add(ref reference, 2) == ADDRESS_FAMILY_INTER_NETWORK_V4_MAPPED_V6 && reference == 0 && Unsafe.Add(ref reference, 1) == 0;
             }
         }
 
